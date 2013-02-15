@@ -11,18 +11,21 @@ class Tester(object):
     def __init__(self):
         return None
 
-    def do_tests(self, verbose=False):
+    def do_tests(self, **kwargs):
         """ This will run every method inside the class
 
         This is used to run the tests from the class inherited by this one,
         hopefully the tests will start with "test", we'll run all of those
         """
+        # Reset log
+        self.log = {}
+
         for name in dir(self):
             if name.startswith('test'):
                 self.actual_test = name
                 getattr(self, name)()
 
-        if verbose:
+        if 'verbose' in kwargs.keys() and kwargs['verbose'] is True:
             for test_name in self.log.keys():
                 print test_name + ":\n"
                 print self.log[test_name]
@@ -70,7 +73,11 @@ class Tester(object):
         self._log('○', 'red', name)
 
     def _log(self, result, color, name=None):
-        log_str = colored('%s: %s\n' % (result, name), color)
+        if name is None:
+            log_str = colored('%s' % result, color)
+        else:
+            log_str = colored('%s: %s\n' % (result, name), color)
+
         try:
             self.log[self.actual_test] += log_str
         except KeyError:

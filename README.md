@@ -29,4 +29,4 @@ Check the `example.py` file
 
 ## Roadmap
 
-* Suites
+* ~~Suites~~
