@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from termcolor import colored
+import inspect
 
 
 class Tester(object):
     successes = 0
     fails     = 0
     log       = {}
+    long_log  = {}
 
     def __init__(self):
         return None
@@ -19,6 +21,7 @@ class Tester(object):
         """
         # Reset log
         self.log = {}
+        self.long_log = {}
 
         for name in dir(self):
             if name.startswith('test'):
@@ -29,6 +32,12 @@ class Tester(object):
             for test_name in self.log.keys():
                 print test_name + ":\n"
                 print self.log[test_name]
+
+            print 'Errors:'
+            for test_name in self.long_log.keys():
+                print test_name + ":"
+                print self.long_log[test_name]
+
             print '#' * 20
 
         print 'From %d tests:' % (self.successes + self.fails)
@@ -43,18 +52,27 @@ class Tester(object):
         return self.assertEqual(logic, result, name)
 
     def assertEqual(self, first_value, second_value, name=None):
+        if name is None:
+            name = self.funcname()
+
         if first_value == second_value:
             return self._success(name)
         else:
             return self._fail(name)
 
     def assertTrue(self, test, name=None):
+        if name is None:
+            name = self.funcname()
+
         if test is True:
             return self._success(name)
         else:
             return self._fail(name)
 
     def assertRaises(self, exception, method, args=None, name=None):
+        if name is None:
+            name = self.funcname()
+
         try:
             method(args)
             return self._fail(name)
@@ -71,6 +89,7 @@ class Tester(object):
     def _fail(self, name):
         self.fails += 1
         self._log('○', 'red', name)
+        self._long_log(name, 'red')
 
     def _log(self, result, color, name=None):
         if name is None:
@@ -82,3 +101,15 @@ class Tester(object):
             self.log[self.actual_test] += log_str
         except KeyError:
             self.log[self.actual_test] = log_str
+
+    def _long_log(self, name, color):
+        log_str = colored('%s failed' % name, color)
+
+        try:
+            self.long_log[self.actual_test] += log_str
+        except KeyError:
+            self.long_log[self.actual_test] = log_str
+
+    def funcname(self):
+        """ Returns function name """
+        return inspect.stack()[1][3]
